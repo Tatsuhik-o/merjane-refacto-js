@@ -36,8 +36,8 @@ export class ProductService {
 
 	public async handleExpiredProduct(p: Product): Promise<void> {
 		const currentDate = new Date();
-		if (p.available > 0 && p.expiryDate! > currentDate) {
-			p.available -= 1;
+		if (p.expiryDate! > currentDate) {
+			p.available = Math.max(p.available - 1, 0); // same thing, this will always default to a positive number
 			await this.db.update(products).set(p).where(eq(products.id, p.id));
 		} else {
 			this.ns.sendExpirationNotification(p.name, p.expiryDate!);

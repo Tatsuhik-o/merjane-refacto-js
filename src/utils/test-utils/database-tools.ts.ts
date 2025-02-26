@@ -19,11 +19,18 @@ export async function cleanAllLooseDatabases(prefix: string) {
 }
 
 export async function cleanUp(databaseName: string) {
-	await rm(databaseName, {force: true});
+	try {
+        const sqlite = new SqliteDatabase(databaseName);
+        sqlite.close(); // DB being open prevented file from being deleted
+        await new Promise(resolve => setTimeout(resolve, 100)); // mimicking a small delay to allow time to close db
+        await rm(databaseName, { force: true });
+    } catch (error) {
+        console.error(`Error cleaning up database ${databaseName}:`, error);
+    }
 }
 
 export async function createDatabaseMock() {
-	const randomName = uniqueNamesGenerator({dictionaries: [adjectives, colors, animals]}); // Big_red_donkey
+	const randomName = uniqueNamesGenerator({dictionaries: [adjectives, colors, animals]}); // Big_red_donkey (trolling)
 	const databaseName = `${UNIT_TEST_DB_PREFIX}${randomName}.db`;
 	const sqlite = new SqliteDatabase(databaseName);
 	await exec(`pnpm drizzle-kit push --schema=src/db/schema.ts --dialect=sqlite --url=${databaseName}`);
