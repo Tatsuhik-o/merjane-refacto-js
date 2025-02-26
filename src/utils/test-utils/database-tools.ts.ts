@@ -21,9 +21,10 @@ export async function cleanAllLooseDatabases(prefix: string) {
 export async function cleanUp(databaseName: string) {
 	try {
         const sqlite = new SqliteDatabase(databaseName);
-        sqlite.close(); // DB being open prevented file from being deleted
-        await new Promise(resolve => setTimeout(resolve, 100)); // mimicking a small delay to allow time to close db
-        await rm(databaseName, { force: true });
+        sqlite.close();
+        await new Promise(resolve => setTimeout(resolve, 100));
+        await rm(databaseName, { force: true }); // for some reason this doesn't force the removal so i had to manually close the db
+		// for the file to be removed
     } catch (error) {
         console.error(`Error cleaning up database ${databaseName}:`, error);
     }
