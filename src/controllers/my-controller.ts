@@ -47,7 +47,9 @@ export const myController = fastifyPlugin(async server => {
 
 			const updateProductAvailability = async (p: any) => {
 				p.available = Math.max(p.available - 1, 0) 
-				await db.update(products).set(p).where(eq(products.id, p.id));
+				// Another bonus don't know if the app needs it but everytime a new update to stock if it is already 0 will trigger
+				// a notification to restock
+				await db.update(products).set(p).where(eq(products.id, p.id)); 
 			};
 
 			const { products: productList } = order;
@@ -59,7 +61,7 @@ export const myController = fastifyPlugin(async server => {
 					case 'NORMAL':
 						await updateProductAvailability(p);
 						// removed destructuring to make it easier to know where the keys and values belongs to
-						if (p.leadTime > 0) {
+						if (p.available === 0 && p.leadTime > 0) {
 							await ps.notifyDelay(p.leadTime, p);
 						}
 						break;

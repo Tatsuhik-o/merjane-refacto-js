@@ -7,15 +7,17 @@ import dotenv from 'dotenv';
 convict.addFormats(convictFormatWithValidator );
 
 const configPath = process.env['CONFIG_PATH']
-// simple statemnt is enough if configPath is undefined then 
-// dotenvPath infer that from it otherwise it moves to second statement
+// simple line is enough, if configPath is undefined then dotenvPath will defer to undefined by default
 const dotenvPath = configPath && path.resolve(process.cwd(), configPath); 
 
 
 if (dotenvPath) {
 	// why verify a second time when you can merge all operations in one
 	console.log(`Loading env variables from "${dotenvPath}"`);
-	dotenv.config({ path: dotenvPath });
+	// I would have prefered to set dotenv in here to avoid rechecking but I assume you want it to have a default value regardless
+	// dotenv.config({ path: dotenvPath });
 }
+
+dotenv.config(dotenvPath ? {path: dotenvPath} : undefined);
 
 export {default as dotEnvConvict} from 'convict';
